@@ -14,7 +14,7 @@ var (
 	sugared *zap.SugaredLogger
 )
 
-func InitLog(conf conf.Log) {
+func Init(conf conf.Log) {
 	sync := getSync(conf)
 	syncer := zapcore.AddSync(sync)
 	writeSyncer := zapcore.NewMultiWriteSyncer(syncer)
@@ -70,4 +70,9 @@ func getLevel(level string) zapcore.Level {
 	default:
 		return zapcore.InfoLevel
 	}
+}
+
+func Set(l *zap.Logger) {
+	logger = l
+	sugared = l.Sugar()
 }
