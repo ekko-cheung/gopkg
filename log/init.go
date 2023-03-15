@@ -4,9 +4,6 @@ import (
 	"github.com/veerdone/gopkg/conf"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
-	"io"
-	"os"
 )
 
 var (
@@ -15,9 +12,9 @@ var (
 )
 
 func Init(conf conf.Log) {
-	sync := getSync(conf)
-	syncer := zapcore.AddSync(sync)
-	writeSyncer := zapcore.NewMultiWriteSyncer(syncer)
+	initSyncFuncMap()
+	ws := getSyncs(conf)
+	writeSyncer := zapcore.NewMultiWriteSyncer(ws...)
 
 	config := zapcore.EncoderConfig{
 		CallerKey:      "caller_line",
@@ -37,21 +34,6 @@ func Init(conf conf.Log) {
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(config), writeSyncer, zap.NewAtomicLevelAt(level))
 
 	logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-}
-
-func getSync(conf conf.Log) io.Writer {
-	if conf.Dev || conf.FileName == "" {
-		return os.Stdout
-	}
-	sync := &lumberjack.Logger{
-		Filename:   conf.FileName,
-		MaxAge:     conf.MaxAge,
-		MaxBackups: conf.MaxBackups,
-		MaxSize:    conf.MaxSize,
-		Compress:   conf.Compress,
-	}
-
-	return sync
 }
 
 func getLevel(level string) zapcore.Level {

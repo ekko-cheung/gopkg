@@ -34,3 +34,9 @@ func Init(conf interface{}) {
 		panic(fmt.Sprintf("unmarshal config fail: %s", err))
 	}
 }
+
+func Parse(key string, conf interface{}) {
+	if err := viper.UnmarshalKey(key, conf); err != nil {
+		panic(fmt.Sprintf("unmarshal config fail: %s", err))
+	}
+}

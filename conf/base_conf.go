@@ -23,13 +23,8 @@ type Redis struct {
 }
 
 type Log struct {
-	Level      string `yaml:"level" json:"level" toml:"level" properties:"level"`
-	Dev        bool   `yaml:"dev" json:"dev" toml:"dev" properties:"dev"`
-	FileName   string `yaml:"fileName" json:"fileName" toml:"fileName" properties:"fileName"`
-	MaxSize    int    `yaml:"maxSize" json:"maxSize" toml:"maxSize" properties:"maxSize"`
-	MaxBackups int    `yaml:"maxBackups" json:"maxBackups" toml:"maxBackups" properties:"maxBackups"`
-	MaxAge     int    `yaml:"maxAge" json:"maxAge" toml:"maxAge" properties:"maxAge"`
-	Compress   bool   `yaml:"compress" json:"compress" toml:"compress" properties:"compress"`
+	Level  string   `yaml:"level" json:"level" toml:"level" properties:"level"`
+	Output []string `yaml:"output" json:"output" toml:"output" properties:"output"`
 }
 
 type Etcd struct {
