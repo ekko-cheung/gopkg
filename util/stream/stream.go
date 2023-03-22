@@ -22,60 +22,73 @@ type Stream[T any] interface {
 }
 
 type streamImpl[T any] struct {
-	val []T
-	f   func()
+	val     []T
+	source  []T
+	isFirst bool
+	f       func()
 }
 
 func New[T any](arr []T) Stream[T] {
-	val := make([]T, len(arr))
-	copy(val, arr)
 	s := streamImpl[T]{
-		val: val,
-		f:   func() {},
+		source:  arr,
+		f:       func() {},
+		isFirst: true,
 	}
 
 	return &s
 }
 
 func (s *streamImpl[T]) Filter(f Filter[T]) Stream[T] {
-	if len(s.val) == 0 {
+	arr := s.arr()
+	if len(arr) == 0 {
 		return s
 	}
 	fun := s.f
 	s.f = func() {
 		fun()
-		if len(s.val) == 0 {
+		arr := s.arr()
+		if len(arr) == 0 {
 			return
 		}
-		temp := make([]T, 0, len(s.val))
-		for _, item := range s.val {
+		temp := make([]T, 0, len(arr))
+		for _, item := range arr {
 			if f(item) {
 				temp = append(temp, item)
 			}
 		}
 		s.val = temp
+		s.isFirst = false
 	}
 
 	return s
 }
 
 func (s *streamImpl[T]) ForEach(f ForEach[T]) {
-	if len(s.val) == 0 {
+	arr := s.arr()
+	if len(arr) == 0 {
 		return
 	}
 	s.f()
-	for i := range s.val {
-		f(s.val[i])
+	arr = s.arr()
+	for i := range arr {
+		f(arr[i])
 	}
 }
 
 func (s *streamImpl[T]) Reverse() Stream[T] {
-	if len(s.val) == 0 || len(s.val) == 1 {
+	arr := s.arr()
+	if len(arr) == 0 || len(arr) == 1 {
 		return s
 	}
 	fun := s.f
 	s.f = func() {
 		fun()
+		if s.val == nil {
+			val := make([]T, len(s.source))
+			copy(val, s.source)
+			s.val = val
+			s.isFirst = false
+		}
 		valLen := len(s.val)
 		if valLen == 0 || valLen == 1 {
 			return
@@ -95,7 +108,7 @@ func (s *streamImpl[T]) Reverse() Stream[T] {
 
 func (s *streamImpl[T]) Count() int {
 	s.f()
-	count := len(s.val)
+	count := len(s.arr())
 	s.free()
 
 	return count
@@ -103,7 +116,7 @@ func (s *streamImpl[T]) Count() int {
 
 func (s *streamImpl[T]) ToArray() []T {
 	s.f()
-	val := s.val
+	val := s.arr()
 	s.free()
 
 	return val
@@ -112,40 +125,42 @@ func (s *streamImpl[T]) ToArray() []T {
 func (s *streamImpl[T]) free() {
 	s.f = nil
 	s.val = nil
-	s.val = nil
+	s.source = nil
 }
 
 func (s *streamImpl[T]) Limit(i int) Stream[T] {
-	valLen := len(s.val)
+	valLen := len(s.arr())
 	if valLen == 0 || i >= valLen {
 		return s
 	}
 	fun := s.f
 	s.f = func() {
 		fun()
-		valLen := len(s.val)
+		arr := s.arr()
+		valLen := len(arr)
 		if valLen == 0 || i+1 > valLen {
 			return
 		}
-		s.val = s.val[:i]
+		s.val = arr[:i]
 	}
 
 	return s
 }
 
 func (s *streamImpl[T]) Skip(i int) Stream[T] {
-	valLen := len(s.val)
+	valLen := len(s.arr())
 	if valLen == 0 || i >= valLen {
 		return s
 	}
 	fun := s.f
 	s.f = func() {
 		fun()
-		valLen := len(s.val)
+		arr := s.arr()
+		valLen := len(arr)
 		if valLen == 0 || i+1 > valLen {
 			return
 		}
-		s.val = s.val[i:]
+		s.val = arr[i:]
 	}
 
 	return s
@@ -153,50 +168,54 @@ func (s *streamImpl[T]) Skip(i int) Stream[T] {
 
 func (s *streamImpl[T]) Max(f Compare[T]) T {
 	s.f()
-	if len(s.val) == 0 {
+	arr := s.arr()
+	if len(arr) == 0 {
 		t := new(T)
 		return *t
 	}
-	if len(s.val) == 1 {
-		return s.val[0]
-	}
-	val := s.val[0]
-	for i := 1; i < len(s.val); i++ {
-		if f(val, s.val[i]) < 0 {
-			val = s.val[i]
+	val := arr[0]
+	for i := 1; i < len(arr); i++ {
+		if f(val, arr[i]) < 0 {
+			val = arr[i]
 		}
 	}
+	s.free()
 
 	return val
 }
 
 func (s *streamImpl[T]) Min(f Compare[T]) T {
 	s.f()
-	if len(s.val) == 0 {
+	arr := s.arr()
+	if len(arr) == 0 {
 		t := new(T)
 		return *t
 	}
-	if len(s.val) == 1 {
-		return s.val[0]
-	}
-	val := s.val[0]
-	for i := 1; i < len(s.val); i++ {
-		if f(val, s.val[i]) >= 0 {
-			val = s.val[i]
+	val := arr[0]
+	for i := 1; i < len(arr); i++ {
+		if f(val, arr[i]) >= 0 {
+			val = arr[i]
 		}
 	}
+	s.free()
 
 	return val
 }
 
 func (s *streamImpl[T]) Sorted(f Compare[T]) Stream[T] {
-	valLen := len(s.val)
+	valLen := len(s.arr())
 	if valLen == 0 || valLen == 1 {
 		return s
 	}
 	fun := s.f
 	s.f = func() {
 		fun()
+		if s.val == nil {
+			val := make([]T, len(s.source))
+			copy(val, s.source)
+			s.val = val
+			s.isFirst = false
+		}
 		valLen := len(s.val)
 		if valLen == 0 || valLen == 1 {
 			return
@@ -219,6 +238,14 @@ func (s *streamImpl[T]) Sorted(f Compare[T]) Stream[T] {
 	}
 
 	return s
+}
+
+func (s *streamImpl[T]) arr() []T {
+	if s.isFirst {
+		return s.source
+	}
+
+	return s.val
 }
 
 func Map[T, R any](source []T, f func(T) R) []R {
