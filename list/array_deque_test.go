@@ -3,7 +3,7 @@ package list
 import "testing"
 
 func TestDeque(t *testing.T) {
-	d := NewDeque[int](8)
+	d := NewArrayDeque[int](6)
 
 	t.Run("AddFirst", func(t *testing.T) {
 		d.AddFirst(3)

@@ -5,28 +5,24 @@ import (
 	"strings"
 )
 
-type Deque[T any] struct {
+type ArrayDeque[T any] struct {
 	element    []*node[T]
 	head, tail int
 	size       int
 }
 
-type node[T any] struct {
-	value T
-}
-
-func NewDeque[T any](num int) *Deque[T] {
+func NewArrayDeque[T any](num int) *ArrayDeque[T] {
 	if num < 0 {
 		num = 16
 	}
-	d := Deque[T]{
+	d := ArrayDeque[T]{
 		element: make([]*node[T], num),
 	}
 
 	return &d
 }
 
-func (d *Deque[T]) AddFirst(value T) {
+func (d *ArrayDeque[T]) AddFirst(value T) {
 	d.head = dec(d.head, len(d.element))
 	d.element[d.head] = &node[T]{value}
 	d.size++
@@ -35,7 +31,7 @@ func (d *Deque[T]) AddFirst(value T) {
 	}
 }
 
-func (d *Deque[T]) AddLast(value T) {
+func (d *ArrayDeque[T]) AddLast(value T) {
 	d.element[d.tail] = &node[T]{value}
 	d.size++
 	d.tail = inc(d.tail, len(d.element))
@@ -44,48 +40,39 @@ func (d *Deque[T]) AddLast(value T) {
 	}
 }
 
-func (d *Deque[T]) GetFirst() T {
+func (d *ArrayDeque[T]) GetFirst() T {
 	n := d.element[d.head]
-	if n != nil {
-		return n.value
-	}
 
-	return *new(T)
+	return n.Val()
 }
 
-func (d *Deque[T]) GetLast() T {
+func (d *ArrayDeque[T]) GetLast() T {
 	n := d.element[dec(d.tail, len(d.element))]
-	if n != nil {
-		return n.value
-	}
-	return *new(T)
+
+	return n.Val()
 }
 
-func (d *Deque[T]) RemoveFirst() T {
+func (d *ArrayDeque[T]) RemoveFirst() T {
 	n := d.element[d.head]
 	if n != nil {
 		d.element[d.head] = nil
 		d.head = inc(d.head, len(d.element))
 		d.size--
-
-		return n.value
 	}
 
-	return *new(T)
+	return n.Val()
 }
 
-func (d *Deque[T]) RemoveLast() T {
+func (d *ArrayDeque[T]) RemoveLast() T {
 	t := dec(d.tail, len(d.element))
 	n := d.element[t]
 	if n != nil {
 		d.element[t] = nil
 		d.tail = t
 		d.size--
-
-		return n.value
 	}
 
-	return *new(T)
+	return n.Val()
 }
 
 func dec(i, modules int) int {
@@ -106,11 +93,11 @@ func inc(i, modules int) int {
 	return i
 }
 
-func (d *Deque[T]) Size() int {
+func (d *ArrayDeque[T]) Size() int {
 	return d.size
 }
 
-func (d *Deque[T]) String() string {
+func (d *ArrayDeque[T]) String() string {
 	if d.size == 0 {
 		return "[]"
 	}
@@ -132,7 +119,7 @@ func (d *Deque[T]) String() string {
 	return b.String()
 }
 
-func (d *Deque[T]) grow() {
+func (d *ArrayDeque[T]) grow() {
 	newSize := len(d.element) << 1
 	newEle := make([]*node[T], newSize)
 	newIndex := 0
@@ -140,7 +127,7 @@ func (d *Deque[T]) grow() {
 		newEle[newIndex] = d.element[i]
 		newIndex++
 	}
-	for i := d.head; i > 0; i-- {
+	for i := 0; i < d.head; i++ {
 		newEle[newIndex] = d.element[i]
 		newIndex++
 	}
