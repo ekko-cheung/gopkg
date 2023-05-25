@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var Nil = redis.Nil
+
 func Client() *redis.Client {
 	return client
 }
