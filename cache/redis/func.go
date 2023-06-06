@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"encoding"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/veerdone/gopkg/log"
 	"github.com/veerdone/gopkg/util"
 	"go.uber.org/zap"

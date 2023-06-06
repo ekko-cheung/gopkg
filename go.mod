@@ -4,7 +4,8 @@ go 1.18
 
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20230124162541-5f7a7d875746
-	github.com/go-redis/redis/v8 v8.11.5
+	github.com/bytedance/sonic v1.8.5
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/spf13/viper v1.15.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.7.0
@@ -12,8 +13,7 @@ require (
 )
 
 require (
-	github.com/bytedance/sonic v1.8.5 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect

@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"github.com/veerdone/gopkg/log"
 	"go.uber.org/zap"
 	"time"
