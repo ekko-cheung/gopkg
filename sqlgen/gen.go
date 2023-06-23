@@ -21,6 +21,7 @@ type Data struct {
 	FuncName      string
 	ParamFullName string
 	ParamName     string
+	FieldLength   int
 }
 
 func convert2Snake(s string) string {
@@ -61,6 +62,7 @@ func parseStruct(s interface{}) Data {
 		FuncName:      name,
 		ParamFullName: fmt.Sprintf("%s.%s", sp[len(sp)-1], name),
 		ParamName:     string(name[0] + 32),
+		FieldLength:   len(fields) - 1,
 	}
 }
 
@@ -102,6 +104,44 @@ func GenSet(pkgName, path, fileName string, m ...interface{}) {
 	f.Close()
 }
 
+func GenSelectColumns(pkgName, path, fileName string, m ...interface{}) {
+	preGen(pkgName, path)
+
+	f, err := os.OpenFile(filepath.Join(path, fileName+".go"), os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		log.Fatalln("open file fail: ", err)
+	}
+
+	parse, err := template.New("").Parse(columnTemplate)
+	if err != nil {
+		log.Fatalln("parse whereTemplate fail: ", err)
+	}
+	for i := range m {
+		where := parseStruct(m[i])
+		parse.Execute(f, where)
+	}
+	f.Close()
+}
+
+func GenInsert(pkgName, path, fileName string, m ...interface{}) {
+	preGen(pkgName, path)
+
+	f, err := os.OpenFile(filepath.Join(path, fileName+".go"), os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		log.Fatalln("open file fail: ", err)
+	}
+
+	parse, err := template.New("").Parse(insertTemplate)
+	if err != nil {
+		log.Fatalln("parse whereTemplate fail: ", err)
+	}
+	for i := range m {
+		where := parseStruct(m[i])
+		parse.Execute(f, where)
+	}
+	f.Close()
+}
+
 func preGen(pkgName, path string) {
 	os.MkdirAll(path, 0777)
 
@@ -114,6 +154,30 @@ func preGen(pkgName, path string) {
 			log.Fatalln("parse trimSqlTemplate fail: ", err)
 		}
 		parse.Execute(file, pkgName)
+	}
+	if file != nil {
 		file.Close()
 	}
+}
+
+func GenAll(pkgName, path, fileName string, m ...interface{}) {
+	preGen(pkgName, path)
+
+	f, err := os.OpenFile(filepath.Join(path, fileName+".go"), os.O_CREATE|os.O_APPEND, 0777)
+	if err != nil {
+		log.Fatalln("open file fail: ", err)
+	}
+
+	wt, _ := template.New("").Parse(whereTemplate)
+	st, _ := template.New("").Parse(setTemplate)
+	ct, _ := template.New("").Parse(columnTemplate)
+	it, _ := template.New("").Parse(insertTemplate)
+	for i := range m {
+		data := parseStruct(m[i])
+		wt.Execute(f, data)
+		st.Execute(f, data)
+		ct.Execute(f, data)
+		it.Execute(f, data)
+	}
+	f.Close()
 }
