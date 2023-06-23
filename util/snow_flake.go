@@ -12,8 +12,6 @@ var snowFlake, _ = NewSnowFlake(0, 0)
 func GenId() int64 {
 	id, err := snowFlake.NextId()
 	if err != nil {
-		//log.Logger.Error("gen id error", zap.Error(err))
-		fmt.Println(err)
 		return time.Now().UnixNano()
 	}
 

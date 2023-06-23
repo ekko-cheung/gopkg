@@ -4,6 +4,7 @@ const (
 	whereTemplate = `
 func Where{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, []interface{}) {
 	sqlBuild := strings.Builder{}
+	sqlBuild.Grow(50)
 	{{range $field := .Fields}}
 	{{- if eq $field.Type "string" -}}
 	if {{$.ParamName}}.{{$field.Name}} != "" {
@@ -71,6 +72,7 @@ func trimSql(s string) string {
 	setTemplate = `
 func Set{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, []interface{}) {
 	sqlBuild := strings.Builder{}
+	sqlBuild.Grow(50)
 	{{range $field := .Fields}}
 	{{- if eq $field.Type "string" -}}
 	if {{$.ParamName}}.{{$field.Name}} != "" {
@@ -121,7 +123,9 @@ func {{.FuncName}}Columns() string {
 	insertTemplate = `
 func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, string, []interface{}){
 	columns := strings.Builder{}
+	columns.Grow(50)
 	values := strings.Builder{}
+	values.WriteString(50)
 	columns.WriteString("(")
 	values.WriteString("(")
 {{range $field := .Fields}}
