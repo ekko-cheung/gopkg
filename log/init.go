@@ -58,3 +58,11 @@ func Set(l *zap.Logger) {
 	logger = l
 	sugared = l.Sugar()
 }
+
+func GetLogger() *zap.Logger {
+	return logger
+}
+
+func GetSugared() *zap.SugaredLogger {
+	return sugared
+}

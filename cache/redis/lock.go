@@ -16,9 +16,10 @@ var unlockScript = redis.NewScript(`
 `)
 
 type Lock struct {
-	cli *redis.Client
-	key string
-	ctx context.Context
+	cli        *redis.Client
+	key        string
+	ctx        context.Context
+	cancelFunc context.CancelFunc
 }
 
 func NewLock(key string, ctx context.Context) *Lock {
@@ -41,9 +42,7 @@ func (l *Lock) Lock(val interface{}, exTime time.Duration) bool {
 
 // TryLock try lock in waitTime, eg:
 //
-// 	ctx, cancel := context.WithCancel(ctx)
 //  l := NewLock(key, ctx)
-// 	defer cancel()
 //  if l.TryLock(val, time.Second, time.Second) {
 //    defer l.Unlock(val)
 //    // business
@@ -73,6 +72,7 @@ func (l *Lock) lock(val interface{}, exTime time.Duration) (bool, error) {
 }
 
 func (l *Lock) watchDog(exTime time.Duration) {
+	l.ctx, l.cancelFunc = context.WithCancel(l.ctx)
 	for {
 		select {
 		case <-l.ctx.Done():
@@ -88,5 +88,9 @@ func (l *Lock) UnLock(val interface{}) {
 	err := unlockScript.Run(l.ctx, l.cli, []string{l.key}, val).Err()
 	if err != nil {
 		log.CtxWarn(l.ctx, "redis run unlock lua script fail", zap.Error(err))
+	}
+	if l.cancelFunc != nil {
+		l.cancelFunc()
+		l.cancelFunc = nil
 	}
 }

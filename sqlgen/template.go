@@ -50,7 +50,10 @@ func Where{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}
 	trimSqlTemplate = `
 package {{.}}
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 func trimSql(s string) string {
 	if s == "" {
@@ -67,6 +70,18 @@ func trimSql(s string) string {
 	}
 
 	return s
+}
+
+func pgPlaceholder(i int) string {
+	return fmt.Sprintf("$%d,", i)
+}
+
+func pgPlaceholder2(i int) string {
+	return fmt.Sprintf("$%d ", i)
+}
+
+func pgPlaceholder3(i int) string {
+	return fmt.Sprintf("$%d", i)
 }
 `
 	setTemplate = `
