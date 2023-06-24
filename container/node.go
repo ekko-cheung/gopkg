@@ -1,4 +1,4 @@
-package list
+package container
 
 type node[T any] struct {
 	value T
