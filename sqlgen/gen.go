@@ -22,6 +22,7 @@ type Data struct {
 	ParamFullName string
 	ParamName     string
 	FieldLength   int
+	TableName string
 }
 
 func convert2Snake(s string) string {
@@ -39,6 +40,10 @@ func convert2Snake(s string) string {
 	return string(b)
 }
 
+type Table interface {
+	TableName() string
+}
+
 func parseStruct(s interface{}) Data {
 	typ := reflect.TypeOf(s)
 	numField := typ.NumField()
@@ -54,15 +59,22 @@ func parseStruct(s interface{}) Data {
 		}
 	}
 
+	tableName := ""
+	if t, ok := s.(Table); ok {
+		tableName = t.TableName()
+	}
+
 	name := typ.Name()
 	path := typ.PkgPath()
 	sp := strings.Split(path, "/")
+
 	return Data{
 		Fields:        fields,
 		FuncName:      name,
 		ParamFullName: fmt.Sprintf("%s.%s", sp[len(sp)-1], name),
 		ParamName:     string(name[0] + 32),
 		FieldLength:   len(fields) - 1,
+		TableName: tableName,
 	}
 }
 

@@ -127,7 +127,7 @@ func Set{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) 
 	{{- end -}}
 	{{- end -}}
 
-	return trimSql(sqlBuild.String()), params
+	return "UPDATE {{.TableName}} SET " + trimSql(sqlBuild.String()), params
 }
 `
 	columnTemplate = `
@@ -136,11 +136,12 @@ func {{.FuncName}}Columns() string {
 }
 `
 	insertTemplate = `
-func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, string, []interface{}){
+func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, []interface{}){
 	columns := strings.Builder{}
 	columns.Grow(50)
+	columns.WriteString("INSERT INTO {{.TableName}}")
 	values := strings.Builder{}
-	values.WriteString(50)
+	values.Grow(50)
 	columns.WriteString("(")
 	values.WriteString("(")
 {{range $field := .Fields}}
@@ -192,7 +193,7 @@ func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{
 	c := trimSql(columns.String()) + ")"
 	v := trimSql(values.String()) + ")"
 
-	return c, v, params
+	return c + "VALUES" + v, params
 }
 `
 )

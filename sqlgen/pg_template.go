@@ -2,9 +2,10 @@ package sqlgen
 
 const (
 	pgInsertTemplate = `
-func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, string, []interface{}){
+func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, []interface{}){
 	columns := strings.Builder{}
 	columns.Grow(50)
+	columns.WriteString("INSERT INTO {{.TableName}}")
 	values := strings.Builder{}
 	values.WriteString(50)
 	columns.WriteString("(")
@@ -66,14 +67,13 @@ func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{
 	c := trimSql(columns.String()) + ")"
 	v := trimSql(values.String()) + ")"
 
-	return c, v, params
+	return c + "VALUES" + v, params
 }
 `
 	pgWhereTemplate = `
-func Where{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, []interface{}) {
+func Where{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}, i int) (string, []interface{}, int) {
 	sqlBuild := strings.Builder{}
 	sqlBuild.Grow(50)
-	i := 1
 	{{range $field := .Fields}}
 	{{- if eq $field.Type "string" -}}
 	if {{$.ParamName}}.{{$field.Name}} != "" {
@@ -127,14 +127,13 @@ func Where{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}
 	{{- end -}}
 	{{- end -}}
 
-	return trimSql(sqlBuild.String()), params
+	return trimSql(sqlBuild.String()), params, i
 }
 `
 	pgSetTemplate = `
-func Set{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) (string, []interface{}) {
+func Set{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}, i int) (string, []interface{}, int) {
 	sqlBuild := strings.Builder{}
 	sqlBuild.Grow(50)
-	i := 0
 	{{range $field := .Fields}}
 	{{- if eq $field.Type "string" -}}
 	if {{$.ParamName}}.{{$field.Name}} != "" {
@@ -188,7 +187,7 @@ func Set{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{}) 
 	{{- end -}}
 	{{- end -}}
 
-	return trimSql(sqlBuild.String()), params
+	return "UPDATE {{.TableName}} SET" + trimSql(sqlBuild.String()), params, i
 }
 `
 )
