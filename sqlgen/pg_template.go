@@ -7,7 +7,7 @@ func Insert{{.FuncName}}({{.ParamName}} *{{.ParamFullName}}, params []interface{
 	columns.Grow(50)
 	columns.WriteString("INSERT INTO {{.TableName}}")
 	values := strings.Builder{}
-	values.WriteString(50)
+	values.Grow(50)
 	columns.WriteString("(")
 	values.WriteString("(")
 	i := 1
