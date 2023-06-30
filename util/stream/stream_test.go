@@ -11,7 +11,7 @@ var a = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 func TestStreamImpl_ToArray(t *testing.T) {
 	s := New(a)
-	t.Log(s.ToArray())
+	t.Log(s.ToSlice())
 }
 
 func TestStreamImpl_ForEach(t *testing.T) {
@@ -28,25 +28,25 @@ func TestStreamImpl_Count(t *testing.T) {
 
 func TestStreamImpl_Reverse(t *testing.T) {
 	s := New(a)
-	t.Log(s.Reverse().ToArray())
+	t.Log(s.Reverse().ToSlice())
 }
 
 func TestStreamImpl_Filter(t *testing.T) {
 	s := New(a)
 	array := s.Filter(func(i int) bool {
-		return i > 10
-	}).Reverse().ToArray()
+		return i > 8
+	}).Reverse().ToSlice()
 	t.Log(array)
 }
 
 func TestStreamImpl_Limit(t *testing.T) {
 	s := New(a)
-	t.Log(s.Limit(5).ToArray())
+	t.Log(s.Limit(5).ToSlice())
 }
 
 func TestStreamImpl_Skip(t *testing.T) {
 	s := New(a)
-	t.Log(s.Skip(5).ToArray())
+	t.Log(s.Skip(5).ToSlice())
 }
 
 func TestStreamImpl_Max(t *testing.T) {
@@ -69,7 +69,7 @@ func TestStreamImpl_Sorted(t *testing.T) {
 	s := New([]int{3, 1, 4, 6, 2, 6, 10, 7})
 	array := s.Sorted(func(a, b int) int {
 		return a - b
-	}).ToArray()
+	}).ToSlice()
 	t.Log(array)
 }
 
