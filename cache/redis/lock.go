@@ -18,76 +18,75 @@ var unlockScript = redis.NewScript(`
 type Lock struct {
 	cli        *redis.Client
 	key        string
-	ctx        context.Context
 	cancelFunc context.CancelFunc
 }
 
-func NewLock(key string, ctx context.Context) *Lock {
+func NewLock(key string) *Lock {
 	return &Lock{
 		cli: client,
 		key: key,
-		ctx: ctx,
 	}
 }
 
-func (l *Lock) Lock(val interface{}, exTime time.Duration) bool {
-	ok, err := l.lock(val, exTime)
+func (l *Lock) Lock(ctx context.Context, val interface{}, exTime time.Duration) bool {
+	ok, err := l.lock(ctx, val, exTime)
 	if err != nil || !ok {
 		return false
 	}
 
-	go l.watchDog(exTime)
+	go l.watchDog(ctx, exTime)
 	return true
 }
 
 // TryLock try lock in waitTime, eg:
 //
-//  l := NewLock(key, ctx)
-//  if l.TryLock(val, time.Second, time.Second) {
-//    defer l.Unlock(val)
-//    // business
-//  }
-func (l *Lock) TryLock(val interface{}, waitTime, exTime time.Duration) bool {
-	ctx, cancel := context.WithTimeout(l.ctx, waitTime)
+//	l := NewLock(key, ctx)
+//	if l.TryLock(val, time.Second, time.Second) {
+//	  defer l.Unlock(val)
+//	  // business
+//	}
+func (l *Lock) TryLock(ctx context.Context, val interface{}, waitTime, exTime time.Duration) bool {
+	ctx, cancel := context.WithTimeout(ctx, waitTime)
 	defer cancel()
 	for {
 		select {
 		case <-ctx.Done():
 			return false
 		default:
-			if l.Lock(val, exTime) {
+			if l.Lock(ctx, val, exTime) {
 				return true
 			}
 		}
 	}
 }
 
-func (l *Lock) lock(val interface{}, exTime time.Duration) (bool, error) {
-	b, err := l.cli.SetNX(l.ctx, l.key, val, exTime).Result()
+func (l *Lock) lock(ctx context.Context, val interface{}, exTime time.Duration) (bool, error) {
+	b, err := l.cli.SetNX(ctx, l.key, val, exTime).Result()
 	if err != nil {
-		log.CtxWarn(l.ctx, "redis setNX fail", zap.Error(err))
+		log.CtxWarn(ctx, "redis setNX fail", zap.Error(err))
 	}
 
 	return b, err
 }
 
-func (l *Lock) watchDog(exTime time.Duration) {
-	l.ctx, l.cancelFunc = context.WithCancel(l.ctx)
+func (l *Lock) watchDog(ctx context.Context, exTime time.Duration) {
+	c, cancelFunc := context.WithCancel(ctx)
+	l.cancelFunc = cancelFunc
 	for {
 		select {
-		case <-l.ctx.Done():
+		case <-c.Done():
 			return
 		default:
-			l.cli.Expire(l.ctx, l.key, exTime)
+			l.cli.Expire(c, l.key, exTime)
 			time.Sleep(exTime / 3)
 		}
 	}
 }
 
-func (l *Lock) UnLock(val interface{}) {
-	err := unlockScript.Run(l.ctx, l.cli, []string{l.key}, val).Err()
+func (l *Lock) UnLock(ctx context.Context, val interface{}) {
+	err := unlockScript.Run(ctx, l.cli, []string{l.key}, val).Err()
 	if err != nil {
-		log.CtxWarn(l.ctx, "redis run unlock lua script fail", zap.Error(err))
+		log.CtxWarn(ctx, "redis run unlock lua script fail", zap.Error(err))
 	}
 	if l.cancelFunc != nil {
 		l.cancelFunc()
