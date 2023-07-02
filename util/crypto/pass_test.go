@@ -17,38 +17,20 @@
 package crypto
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"github.com/veerdone/gopkg/util"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-func HexEncodeSha256(s string) string {
-	b := HexEncodeSha256B(util.StringToSliceByte(s))
-
-	return util.SliceByteToString(b)
+func TestEncoderPass(t *testing.T) {
+	EncoderPass("abcd123456")
 }
 
-func BHexEncodeSha256(b []byte) string {
-	bytes := HexEncodeSha256B(b)
+func TestComparePass(t *testing.T) {
+	a := assert.New(t)
 
-	return util.SliceByteToString(bytes)
-}
-
-func HexEncodeSha256B(b []byte) []byte {
-	h := sha256.New()
-	h.Write(b)
-	sum := h.Sum(nil)
-
-	dst := make([]byte, hex.EncodedLen(len(sum)))
-	hex.Encode(dst, sum)
-
-	return dst
-}
-
-func HmacSha256(msg, secret []byte) []byte {
-	h := hmac.New(sha256.New, secret)
-	h.Write(msg)
-
-	return h.Sum(nil)
+	rowPass := "abcd123456"
+	hashPass := "$2a$10$zw9iZSvaO45ao2zgm3GOt.ricHfQLs/7xpCJt0blR5clVYnXcyT4W"
+	errHashPass := "$2a$10$zw9iZSvaO45ao2zgm3GOt.ricHfQLs/7xpCJt0blR5clVYnXcyT4C"
+	a.True(ComparePass(hashPass, rowPass))
+	a.False(ComparePass(hashPass, errHashPass))
 }

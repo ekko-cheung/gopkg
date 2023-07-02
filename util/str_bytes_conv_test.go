@@ -1,5 +1,3 @@
-//go:build go1.18 || 1.19 || 1.20
-
 /*
  * Copyright 2023 veerdone
  *
@@ -16,24 +14,16 @@
  * limitations under the License.
  */
 
-package container
+package util
 
 import "testing"
 
-func TestArrayBlockDeque(t *testing.T) {
-	d := NewArrayBlockDeque[int](4)
+func TestSliceByteToString(t *testing.T) {
+	b := []byte("abc")
+	SliceByteToString(b)
+}
 
-	t.Run("Put", func(t *testing.T) {
-		d.Put(1)
-		d.Put(2)
-		d.Put(3)
-		d.Put(4)
-	})
-
-	t.Run("Take", func(t *testing.T) {
-		t.Log(d.Take())
-		t.Log(d.Take())
-		t.Log(d.Take())
-		t.Log(d.Take())
-	})
+func TestStringToSliceByte(t *testing.T) {
+	s := "abc"
+	StringToSliceByte(s)
 }

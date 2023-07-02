@@ -17,38 +17,27 @@
 package crypto
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"github.com/veerdone/gopkg/util"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-func HexEncodeSha256(s string) string {
-	b := HexEncodeSha256B(util.StringToSliceByte(s))
-
-	return util.SliceByteToString(b)
+func TestHexEncodeSha256(t *testing.T) {
+	s := "abcdefg"
+	assert.NotEmpty(t, HexEncodeSha256(s))
 }
 
-func BHexEncodeSha256(b []byte) string {
-	bytes := HexEncodeSha256B(b)
-
-	return util.SliceByteToString(bytes)
+func TestBHexEncodeSha256(t *testing.T) {
+	b := []byte("abcdefd")
+	assert.NotEmpty(t, BHexEncodeSha256(b))
 }
 
-func HexEncodeSha256B(b []byte) []byte {
-	h := sha256.New()
-	h.Write(b)
-	sum := h.Sum(nil)
-
-	dst := make([]byte, hex.EncodedLen(len(sum)))
-	hex.Encode(dst, sum)
-
-	return dst
+func TestHexEncodeSha256B(t *testing.T) {
+	b := []byte("abcdfdf")
+	assert.NotEmpty(t, HexEncodeSha256B(b))
 }
 
-func HmacSha256(msg, secret []byte) []byte {
-	h := hmac.New(sha256.New, secret)
-	h.Write(msg)
-
-	return h.Sum(nil)
+func TestHmacSha256(t *testing.T) {
+	msg := []byte("abcdfd")
+	secret := []byte("fde4343refd")
+	assert.NotEmpty(t, HmacSha256(msg, secret))
 }
