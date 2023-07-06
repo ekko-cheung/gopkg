@@ -31,194 +31,51 @@ type Compare[T any] func(a T, b T) int
 
 type ForEach[T any] func(T)
 
+type Match[T any] func(T) bool
+
 type Stream[T any] interface {
+	// Filter returns a stream consisting of the elements of this stream that match the given predicate
 	Filter(Filter[T]) Stream[T]
+	// ForEach performs an action for each element of this stream
 	ForEach(ForEach[T])
+	// Reverse returns a stream consisting of the elements of this stream, reverse the order of elements
 	Reverse() Stream[T]
+	// Count returns the count of elements in this stream
 	Count() int
+	// ToSlice return slice containing the elements of this stream
 	ToSlice() []T
+	// Limit returns a stream consisting of the elements of this stream, truncated to be no longer than maxSize in length
 	Limit(int) Stream[T]
+	// Min returns the minimum element of this stream according to the provided Comparator
 	Min(Compare[T]) T
+	// Max returns the maximum element of this stream according to the provided Comparator
 	Max(Compare[T]) T
+	// Skip returns a stream consisting of the remaining elements of this stream after discarding the first n elements of the stream
+	// If this stream contains fewer than do nothing
 	Skip(int) Stream[T]
+	// Sorted Returns a stream consisting of the elements of this stream, sorted according to the given method
 	Sorted(Compare[T]) Stream[T]
-}
-
-type streamImpl[T any] struct {
-	val []T
-	fs  []func()
-}
-
-func New[T any](arr []T) Stream[T] {
-	val := make([]T, len(arr))
-	copy(val, arr)
-	s := streamImpl[T]{
-		fs:  make([]func(), 0),
-		val: val,
-	}
-
-	return &s
-}
-
-func (s *streamImpl[T]) notEmpty() bool {
-	return len(s.val) != 0
-}
-
-func (s *streamImpl[T]) Filter(f Filter[T]) Stream[T] {
-	s.fs = append(s.fs, func() {
-		if s.notEmpty() {
-			val := make([]T, 0, len(s.val))
-			for i := range s.val {
-				v := s.val[i]
-				if f(v) {
-					val = append(val, v)
-				}
-			}
-			s.val = val
-		}
-	})
-
-	return s
-}
-
-func (s *streamImpl[T]) ForEach(f ForEach[T]) {
-	s.execute()
-	if s.notEmpty() {
-		for i := range s.val {
-			f(s.val[i])
-		}
-	}
-	s.free()
-}
-
-func (s *streamImpl[T]) Reverse() Stream[T] {
-	s.fs = append(s.fs, func() {
-		l := len(s.val)
-		if s.notEmpty() && l != 1 {
-			head := 0
-			tail := l - 1
-			for head < tail {
-				tem := s.val[head]
-				s.val[head] = s.val[tail]
-				s.val[tail] = tem
-				head++
-				tail--
-			}
-		}
-	})
-
-	return s
-}
-
-func (s *streamImpl[T]) Count() int {
-	s.execute()
-	count := len(s.val)
-	s.free()
-
-	return count
-}
-
-func (s *streamImpl[T]) ToSlice() []T {
-	s.execute()
-	val := s.val
-	s.free()
-
-	return val
-}
-
-func (s *streamImpl[T]) free() {
-	s.val = nil
-	s.fs = nil
-}
-
-func (s *streamImpl[T]) Limit(i int) Stream[T] {
-	s.fs = append(s.fs, func() {
-		if s.notEmpty() {
-			l := len(s.val)
-			if i < l {
-				s.val = s.val[:i]
-			}
-		}
-	})
-
-	return s
-}
-
-func (s *streamImpl[T]) Skip(i int) Stream[T] {
-	s.fs = append(s.fs, func() {
-		if s.notEmpty() {
-			l := len(s.val)
-			if i < l {
-				s.val = s.val[i:]
-			}
-		}
-	})
-
-	return s
-}
-
-func (s *streamImpl[T]) Max(f Compare[T]) T {
-	s.execute()
-
-	if s.notEmpty() {
-		max := s.val[0]
-		for i := 1; i < len(s.val); i++ {
-			if f(s.val[i], max) > 0 {
-				max = s.val[i]
-			}
-		}
-
-		return max
-	}
-	s.free()
-
-	return *new(T)
-}
-
-func (s *streamImpl[T]) Min(f Compare[T]) T {
-	s.execute()
-	if s.notEmpty() {
-		min := s.val[0]
-		for i := 1; i < len(s.val); i++ {
-			if f(s.val[i], min) < 0 {
-				min = s.val[i]
-			}
-		}
-	}
-
-	s.free()
-
-	return *new(T)
-}
-
-func (s *streamImpl[T]) Sorted(f Compare[T]) Stream[T] {
-	s.fs = append(s.fs, func() {
-		l := len(s.val)
-		if l > 1 {
-			for i := l - 1; i > 0; i-- {
-				flag := 0
-				for j := 0; j < i; j++ {
-					if f(s.val[j], s.val[j+1]) > 0 {
-						temp := s.val[j]
-						s.val[j] = s.val[j+1]
-						s.val[j+1] = temp
-						flag = 1
-					}
-				}
-				if flag == 0 {
-					break
-				}
-			}
-		}
-	})
-
-	return s
-}
-
-func (s *streamImpl[T]) execute() {
-	for i := range s.fs {
-		s.fs[i]()
-	}
+	// Peek returns a stream consisting of the elements of this stream,
+	// additionally performing the provided action on each element as elements are consumed from the resulting stream
+	Peek(ForEach[T]) Stream[T]
+	// AnyMatch returns whether any elements of this stream match the provided predicate.
+	// May not evaluate the predicate on all elements if not necessary for determining the result.
+	// If the stream is empty then false is returned and the predicate is not evaluated
+	AnyMatch(Match[T]) bool
+	// AllMatch returns whether all elements of this stream match the provided predicate.
+	// May not evaluate the predicate on all elements if not necessary for determining the result.
+	// If the stream is empty then true is returned and the predicate is not evaluated
+	AllMatch(Match[T]) bool
+	// NoneMatch returns whether no elements of this stream match the provided predicate.
+	// May not evaluate the predicate on all elements if not necessary for determining the result.
+	// If the stream is empty then true is returned and the predicate is not evaluated
+	NoneMatch(Match[T]) bool
+	// FindAny returns an element that matches the given method, or any empty value if the stream is empty or not match
+	FindAny(Match[T]) T
+	// FindFirst returns an element describing the first element of this stream, or an empty value if the stream is empty
+	FindFirst() T
+	// FindLast returns an element describing the last element of this stream, or ant empty value if the stream is empty
+	FindLast() T
 }
 
 func Map[T, R any](source []T, f func(T) R) []R {
