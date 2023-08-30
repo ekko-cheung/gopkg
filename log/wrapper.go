@@ -22,6 +22,14 @@ import (
 	"go.uber.org/zap"
 )
 
+type Log interface {
+	Info(ctx context.Context, msg string, fields ...zap.Field)
+	Warn(ctx context.Context, msg string, fields ...zap.Field)
+	Error(ctx context.Context, msg string, fields ...zap.Field)
+	Fatal(ctx context.Context, msg string, fields ...zap.Field)
+	Debug(ctx context.Context, msg string, fields ...zap.Field)
+}
+
 type Logger struct {
 	l *zap.Logger
 	s *zap.SugaredLogger
