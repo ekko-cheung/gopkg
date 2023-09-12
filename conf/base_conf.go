@@ -25,15 +25,15 @@ type BaseConf struct {
 }
 
 type Db struct {
-	Username string `yaml:"username" json:"username" toml:"username" properties:"username"`
+	Username string `yaml:"username" json:"username" toml:"username" properties:"username" crypto:"-"`
 	Pass     string `yaml:"pass" json:"pass" toml:"pass" properties:"pass"`
 	Url      string `yaml:"url" json:"url" toml:"url" properties:"url"`
-	Database string `yaml:"database" json:"database" toml:"database" properties:"database"`
+	Database string `yaml:"database" json:"database" toml:"database" properties:"database" crypto:"-"`
 }
 
 type Redis struct {
 	Addr     string `yaml:"addr" json:"addr" toml:"addr" properties:"addr"`
-	Username string `yaml:"username" json:"username" toml:"username" properties:"username"`
+	Username string `yaml:"username" json:"username" toml:"username" properties:"username" crypto:"-"`
 	Pass     string `yaml:"pass" json:"pass" toml:"pass" properties:"pass"`
 	Db       int    `yaml:"db" json:"db" toml:"db" properties:"db"`
 }
