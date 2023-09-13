@@ -1,6 +1,11 @@
 package crypto
 
-import "reflect"
+import (
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
+	"os"
+	"reflect"
+)
 
 const (
 	encode = iota
@@ -74,6 +79,33 @@ func decodeOrEncodeConfig(val reflect.Value, typ reflect.Type, key string, types
 		} else {
 			continue
 		}
+	}
+
+	return nil
+}
+
+func WriteEncodeConfig(value interface{}, key, src, out string, options ...viper.DecoderConfigOption) error {
+	viper.SetConfigFile(src)
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
+	if err := viper.Unmarshal(value, options...); err != nil {
+		return err
+	}
+	if err := EncodeConfig(value, key); err != nil {
+		return err
+	}
+	bytes, err := yaml.Marshal(value)
+	if err != nil {
+		return err
+	}
+	file, err := os.OpenFile(out, os.O_RDWR|os.O_CREATE, 0777)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if _, err := file.Write(bytes); err != nil {
+		return err
 	}
 
 	return nil
