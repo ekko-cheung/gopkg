@@ -24,7 +24,7 @@ import (
 	"strings"
 )
 
-func Init(conf interface{}) {
+func Init(conf interface{}, options ...viper.DecoderConfigOption) {
 	var (
 		cfgPath  string
 		fileName string
@@ -46,7 +46,7 @@ func Init(conf interface{}) {
 		panic(fmt.Sprintf("read config fail: %s", err))
 	}
 
-	if err := viper.Unmarshal(conf); err != nil {
+	if err := viper.Unmarshal(conf, options...); err != nil {
 		panic(fmt.Sprintf("unmarshal config fail: %s", err))
 	}
 }
