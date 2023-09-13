@@ -3,12 +3,12 @@ package crypto
 import "testing"
 
 type child struct {
-	Value string
+	Value string `crypto:"-"`
 }
 
 type config struct {
 	Value string
-	Child child `crypto:"-"`
+	Child child
 }
 
 func TestDecodeConfig(t *testing.T) {
