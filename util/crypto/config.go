@@ -39,9 +39,6 @@ func decodeOrEncodeConfig(val reflect.Value, typ reflect.Type, key string, types
 		field := val.Field(i)
 		fieldType := typ.Field(i)
 		tag := fieldType.Tag.Get("crypto")
-		if tag == "-" {
-			continue
-		}
 		if field.Kind() == reflect.Struct {
 			if err := decodeOrEncodeConfig(field, typ, key, types); err != nil {
 				return err
@@ -53,6 +50,9 @@ func decodeOrEncodeConfig(val reflect.Value, typ reflect.Type, key string, types
 			}
 		} else if field.Kind() == reflect.String {
 			if field.IsZero() {
+				continue
+			}
+			if tag != "-" {
 				continue
 			}
 			s := field.Interface().(string)
