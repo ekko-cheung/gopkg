@@ -25,16 +25,16 @@ type BaseConf struct {
 }
 
 type Db struct {
-	Username string `yaml:"username" json:"username" toml:"username" properties:"username" crypto:"-"`
-	Pass     string `yaml:"pass" json:"pass" toml:"pass" properties:"pass"`
-	Url      string `yaml:"url" json:"url" toml:"url" properties:"url"`
-	Database string `yaml:"database" json:"database" toml:"database" properties:"database" crypto:"-"`
+	Username string `yaml:"username" json:"username" toml:"username" properties:"username"`
+	Pass     string `yaml:"pass" json:"pass" toml:"pass" properties:"pass" crypto:"-"`
+	Url      string `yaml:"url" json:"url" toml:"url" properties:"url" crypto:"-"`
+	Database string `yaml:"database" json:"database" toml:"database" properties:"database"`
 }
 
 type Redis struct {
-	Addr     string `yaml:"addr" json:"addr" toml:"addr" properties:"addr"`
-	Username string `yaml:"username" json:"username" toml:"username" properties:"username" crypto:"-"`
-	Pass     string `yaml:"pass" json:"pass" toml:"pass" properties:"pass"`
+	Addr     string `yaml:"addr" json:"addr" toml:"addr" properties:"addr" crypto:"-"`
+	Username string `yaml:"username" json:"username" toml:"username" properties:"username"`
+	Pass     string `yaml:"pass" json:"pass" toml:"pass" properties:"pass" crypto:"-"`
 	Db       int    `yaml:"db" json:"db" toml:"db" properties:"db"`
 }
 
