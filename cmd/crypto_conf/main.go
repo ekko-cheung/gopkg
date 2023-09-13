@@ -8,18 +8,20 @@ import (
 )
 
 var (
-	key      string
-	filePath string
+	key     string
+	srcFile string
+	outFile string
 )
 
 func main() {
 	flag.StringVar(&key, "key", "", "crypto key")
-	flag.StringVar(&filePath, "file", "", "config file path")
+	flag.StringVar(&srcFile, "file", "", "input config file")
+	flag.StringVar(&outFile, "out", "", "out config file")
 	flag.Parse()
-	if key == "" || filePath == "" {
+	if key == "" || srcFile == "" {
 		log.Fatalln("Required parameter missing: key or file")
 	}
-	viper.SetConfigFile(filePath)
+	viper.SetConfigFile(srcFile)
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatalf("viper read config fail: %s", err)
@@ -29,8 +31,13 @@ func main() {
 		log.Fatalf("crypto config fail: %s", err)
 	}
 
-	if err := viper.WriteConfig(); err != nil {
-		log.Fatalf("viper write config fail: %s", err)
+	if outFile == "" {
+		err = viper.WriteConfig()
+	} else {
+		err = viper.WriteConfigAs(outFile)
+	}
+	if err != nil {
+		log.Fatalf("viper wrire config fail: %s", err)
 	}
 }
 
