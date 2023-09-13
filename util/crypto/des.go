@@ -9,16 +9,16 @@ import (
 )
 
 func UnPadPwd(dst []byte) []byte {
-	unpadding := dst[len(dst)-1]                // 获取二进制数组最后一个数值
-	result := dst[:(len(dst) - int(unpadding))] // 截取开始至总长度减去填充值之间的有效数据
+	unpadding := dst[len(dst)-1]
+	result := dst[:(len(dst) - int(unpadding))]
 
 	return result
 }
 
 func PadPwd(srcByte []byte, blockSize int) []byte {
-	padding := blockSize - len(srcByte)%blockSize // 要填充的值和个数
-	slice1 := []byte{byte(padding)}               // 要填充的单个二进制值
-	slice2 := bytes.Repeat(slice1, padding)       // 要填充的二进制数组
+	padding := blockSize - len(srcByte)%blockSize
+	slice1 := []byte{byte(padding)}
+	slice2 := bytes.Repeat(slice1, padding)
 
 	return append(srcByte, slice2...)
 }
@@ -60,4 +60,23 @@ func DesDecoding(pwd, key string) (string, error) {
 	dst = UnPadPwd(dst)
 
 	return string(dst), nil
+}
+
+func DesEncodingMap(m map[string]interface{}, key string) error {
+	for k, v := range m {
+		if tempMap, ok := v.(map[string]interface{}); ok {
+			if err := DesEncodingMap(tempMap, key); err != nil {
+				return err
+			}
+		}
+		if s, ok := v.(string); ok {
+			desStr, err := DesEncoding(s, key)
+			if err != nil {
+				return err
+			}
+			m[k] = desStr
+		}
+	}
+
+	return nil
 }
