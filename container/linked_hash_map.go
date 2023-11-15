@@ -28,7 +28,7 @@ func NewLinkedHashMap[K comparable, V any]() LinkedHashMap[K, V] {
 	}
 }
 
-func (l *LinkedHashMap[K, V]) Insert(key K, value V) {
+func (l *LinkedHashMap[K, V]) Put(key K, value V) {
 	_, ok := l.inner[key]
 	if !ok {
 		l.keys = append(l.keys, key)
@@ -54,6 +54,12 @@ func (l *LinkedHashMap[K, V]) ForEach(f func(key K, value V)) {
 	}
 }
 
+func (l *LinkedHashMap[K, V]) Contains(key K) bool {
+	_, ok := l.inner[key]
+
+	return ok
+}
+
 func (l *LinkedHashMap[K, V]) findKeyInKeysDel(key K) {
 	index := 0
 	for _, v := range l.keys {
@@ -64,4 +70,27 @@ func (l *LinkedHashMap[K, V]) findKeyInKeysDel(key K) {
 	}
 
 	l.keys = l.keys[:index]
+}
+
+func (l *LinkedHashMap[K, V]) Size() int {
+	return len(l.keys)
+}
+
+func (l *LinkedHashMap[K, V]) IsEmpty() bool {
+	return l.Size() == 0
+}
+
+func (l *LinkedHashMap[K, V]) Keys() []K {
+	copyKeys := make([]K, len(l.keys))
+	copy(copyKeys, l.keys)
+
+	return copyKeys
+}
+
+func (l *LinkedHashMap[K, V]) Clear() {
+	l.inner = nil
+	l.inner = make(map[K]V)
+
+	l.keys = nil
+	l.keys = make([]K, 0)
 }

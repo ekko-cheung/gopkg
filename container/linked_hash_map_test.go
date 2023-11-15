@@ -20,27 +20,27 @@ import "testing"
 
 func TestLinkedHashMapInsert(t *testing.T) {
 	m := NewLinkedHashMap[string, int]()
-	m.Insert("a", 1)
-	m.Insert("b", 2)
+	m.Put("a", 1)
+	m.Put("b", 2)
 }
 
 func TestLinkedHashMapGet(t *testing.T) {
 	m := NewLinkedHashMap[string, int]()
-	m.Insert("a", 1)
+	m.Put("a", 1)
 	t.Log(m.Get("a"))
 }
 
 func TestLinkedHashMapDel(t *testing.T) {
 	m := NewLinkedHashMap[string, int]()
-	m.Insert("a", 1)
+	m.Put("a", 1)
 	m.Delete("a")
 }
 
 func TestLinkedHashMapForEach(t *testing.T) {
 	m := NewLinkedHashMap[string, int]()
-	m.Insert("a", 1)
-	m.Insert("b", 2)
-	m.Insert("c", 3)
+	m.Put("a", 1)
+	m.Put("b", 2)
+	m.Put("c", 3)
 	m.Delete("b")
 	m.ForEach(func(key string, value int) {
 		t.Logf("%s=%d\n", key, value)
