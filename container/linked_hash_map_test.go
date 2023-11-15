@@ -18,20 +18,31 @@ package container
 
 import "testing"
 
-func TestArrayBlockDeque(t *testing.T) {
-	d := NewArrayBlockDeque[int](4)
+func TestLinkedHashMapInsert(t *testing.T) {
+	m := NewLinkedHashMap[string, int]()
+	m.Insert("a", 1)
+	m.Insert("b", 2)
+}
 
-	t.Run("Put", func(t *testing.T) {
-		d.Put(1)
-		d.Put(2)
-		d.Put(3)
-		d.Put(4)
-	})
+func TestLinkedHashMapGet(t *testing.T) {
+	m := NewLinkedHashMap[string, int]()
+	m.Insert("a", 1)
+	t.Log(m.Get("a"))
+}
 
-	t.Run("Take", func(t *testing.T) {
-		t.Log(d.Take())
-		t.Log(d.Take())
-		t.Log(d.Take())
-		t.Log(d.Take())
+func TestLinkedHashMapDel(t *testing.T) {
+	m := NewLinkedHashMap[string, int]()
+	m.Insert("a", 1)
+	m.Delete("a")
+}
+
+func TestLinkedHashMapForEach(t *testing.T) {
+	m := NewLinkedHashMap[string, int]()
+	m.Insert("a", 1)
+	m.Insert("b", 2)
+	m.Insert("c", 3)
+	m.Delete("b")
+	m.ForEach(func(key string, value int) {
+		t.Logf("%s=%d\n", key, value)
 	})
 }

@@ -1,5 +1,3 @@
-//go:build go1.18 || 1.19 || 1.20
-
 /*
  * Copyright 2023 veerdone
  *
