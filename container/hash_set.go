@@ -102,3 +102,24 @@ func (h *HashSet[T]) ForEach(f func(T)) {
 		f(t)
 	}
 }
+
+func (h *HashSet[T]) Intersection(h2 *HashSet[T]) []T {
+	res := make([]T, 0, 4)
+	h.ForEach(func(item T) {
+		if h2.Contains(item) {
+			res = append(res, item)
+		}
+	})
+
+	return res
+}
+
+func (h *HashSet[T]) Union(h2 *HashSet[T]) []T {
+	h2.ForEach(func(item T) {
+		if !h.Contains(item) {
+			h.Add(item)
+		}
+	})
+
+	return h.ToSlice()
+}
