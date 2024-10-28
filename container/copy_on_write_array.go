@@ -19,14 +19,14 @@ package container
 import "sync"
 
 type CopyOnWriteArray[T any] struct {
-	lock sync.Locker
+	lock  sync.Locker
 	inner []T
 }
 
-func NewCopyOnWrieArray[T any]() CopyOnWriteArray[T] {
+func NewCopyOnWriteArray[T any]() CopyOnWriteArray[T] {
 	return CopyOnWriteArray[T]{
 		inner: make([]T, 0),
-		lock: &sync.Mutex{},
+		lock:  &sync.Mutex{},
 	}
 }
 
@@ -61,7 +61,7 @@ func (c *CopyOnWriteArray[T]) Remove(index int) {
 	oldInner := c.inner
 	newInner := make([]T, len(oldInner))
 	copy(newInner, oldInner)
-	
+
 	i := 0
 	for j, item := range newInner {
 		if j != index {

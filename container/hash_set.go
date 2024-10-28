@@ -31,6 +31,19 @@ func NewHashSet[T comparable](i ...int) *HashSet[T] {
 	}
 }
 
+func NewHashSetFromSlice[T comparable](s []T) *HashSet[T] {
+	if len(s) == 0 {
+		return &HashSet[T]{}
+	}
+
+	h := NewHashSet[T](len(s))
+	for i := range s {
+		h.Add(s[i])
+	}
+
+	return h
+}
+
 func (h *HashSet[T]) Add(t T) {
 	h.ifNilCreate()
 	h.data[t] = struct{}{}

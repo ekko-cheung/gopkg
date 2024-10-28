@@ -19,9 +19,9 @@ package container
 import "sync"
 
 type ArrayBlockDeque[T any] struct {
-	element           []*node[T]
-	notFull, notEmpty *sync.Cond
-	index, size       int
+	element                   []*node[T]
+	notFull, notEmpty         *sync.Cond
+	takeIndex, putIndex, size int
 }
 
 func NewArrayBlockDeque[T any](num int) *ArrayBlockDeque[T] {
@@ -42,10 +42,10 @@ func (a *ArrayBlockDeque[T]) Put(value T) {
 	if a.size == len(a.element) {
 		a.notFull.Wait()
 	}
-	a.element[a.index] = &node[T]{value}
-	a.index++
-	if a.index == len(a.element) {
-		a.index = 0
+	a.element[a.putIndex] = &node[T]{value}
+	a.putIndex++
+	if a.putIndex == len(a.element) {
+		a.putIndex = 0
 	}
 	a.size++
 	a.notEmpty.Signal()
@@ -57,11 +57,11 @@ func (a *ArrayBlockDeque[T]) Take() T {
 	if a.size == 0 {
 		a.notEmpty.Wait()
 	}
-	n := a.element[a.index]
-	a.element[a.index] = nil
-	a.index++
-	if a.index == len(a.element) {
-		a.index = 0
+	n := a.element[a.takeIndex]
+	a.element[a.takeIndex] = nil
+	a.takeIndex++
+	if a.takeIndex == len(a.element) {
+		a.takeIndex = 0
 	}
 	a.size--
 	a.notFull.Signal()
