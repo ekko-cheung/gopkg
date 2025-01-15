@@ -26,7 +26,7 @@ type LinkedHashMap[K comparable, V any] struct {
 func NewLinkedHashMap[K comparable, V any]() LinkedHashMap[K, V] {
 	return LinkedHashMap[K, V]{
 		inner: make(map[K]V),
-		keys: make([]K, 0),
+		keys: make([]K, 0, 10),
 	}
 }
 
@@ -45,8 +45,10 @@ func (l *LinkedHashMap[K, V]) Get(key K) (V, bool) {
 }
 
 func (l *LinkedHashMap[K, V]) Delete(key K) {
-	delete(l.inner, key)
-	l.findKeyInKeysDel(key)
+	if _, ok := l.inner[key]; ok {
+		delete(l.inner, key)
+		l.findKeyInKeysDel(key)
+	}
 }
 
 func (l *LinkedHashMap[K, V]) ForEach(f func(key K, value V)) {
@@ -63,15 +65,15 @@ func (l *LinkedHashMap[K, V]) Contains(key K) bool {
 }
 
 func (l *LinkedHashMap[K, V]) findKeyInKeysDel(key K) {
-	index := 0
-	for _, v := range l.keys {
-		if v != key {
-			l.keys[index] = v
-			index++
+	for i, k := range l.keys {
+		if k == key {
+			newKeys := make([]K, len(l.keys), cap(l.keys))
+			copy(newKeys, l.keys[:i])
+			copy(newKeys, l.keys[i+1:])
+			l.keys = newKeys
+			break
 		}
 	}
-
-	l.keys = l.keys[:index]
 }
 
 func (l *LinkedHashMap[K, V]) Size() int {

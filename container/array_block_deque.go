@@ -45,10 +45,7 @@ func (a *ArrayBlockDeque[T]) Put(value T) {
 		a.notFull.Wait()
 	}
 	a.element[a.putIndex] = &node[T]{value}
-	a.putIndex++
-	if a.putIndex == len(a.element) {
-		a.putIndex = 0
-	}
+	a.putIndex = (a.putIndex+1) % len(a.element)
 	a.size++
 	a.notEmpty.Signal()
 }
@@ -61,10 +58,7 @@ func (a *ArrayBlockDeque[T]) Take() T {
 	}
 	n := a.element[a.takeIndex]
 	a.element[a.takeIndex] = nil
-	a.takeIndex++
-	if a.takeIndex == len(a.element) {
-		a.takeIndex = 0
-	}
+	a.takeIndex = (a.takeIndex+1) % len(a.element)
 	a.size--
 	a.notFull.Signal()
 
